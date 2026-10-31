@@ -31,7 +31,7 @@ function publicCopy(source){
   doc.title='Анна Витко — резюме-портфолио';
   doc.querySelector('meta[name="robots"]')?.remove();
   doc.querySelector('meta[name="description"]')?.setAttribute('content','Анна Витко — маркетолог. B2B и B2C, стратегия, продвижение, аналитика и запуск продуктов.');
-  doc.querySelectorAll('script,.toolbar,.owner-header,.owner-login,#owner-style,#photo-input,.edit-add-row,.add-tool-inline,.remove-added,.photo-button,#links-dialog,#reset-dialog,#entry-dialog,#toast').forEach(el=>el.remove());
+  doc.querySelectorAll('script,.toolbar,.owner-header,.owner-login,#owner-style,#photo-input,.edit-add-row,.add-tool-inline,.remove-added,.photo-button,#links-dialog,#reset-dialog,#entry-dialog,#experience-dialog,#toast').forEach(el=>el.remove());
   for(const el of doc.querySelectorAll('*'))for(const attribute of [...el.attributes])if(attribute.name.startsWith('data-')&&!['data-certificate'].includes(attribute.name))el.removeAttribute(attribute.name);
   doc.querySelectorAll('[contenteditable],[spellcheck]').forEach(el=>{el.removeAttribute('contenteditable');el.removeAttribute('spellcheck');});
   const certScript=doc.createElement('script');certScript.textContent="document.addEventListener('click',e=>{const a=e.target.closest('a[data-certificate]');if(!a)return;e.preventDefault();const dialog=document.querySelector('#cert-dialog');dialog.querySelector('img').src=a.querySelector('img').src;dialog.querySelector('h2').textContent=a.querySelector('img').alt;dialog.showModal();});document.querySelector('#cert-close').addEventListener('click',()=>document.querySelector('#cert-dialog').close());";doc.body.append(certScript);
@@ -70,7 +70,7 @@ $('#owner-logout').addEventListener('click',lock);
 $('#resume').addEventListener('input',()=>{dirty++;if(!busy&&client)setStatus('Есть неопубликованные правки. Черновик сохраняется на этом устройстве.');});
 $('#resume').addEventListener('click',e=>{if(e.target.closest('[data-remove-added]'))dirty++;});
 $('#reset-confirm').addEventListener('click',()=>{dirty++;if(client&&!busy)setStatus('Есть неопубликованные правки.');});
-$('#entry-form').addEventListener('submit',()=>{dirty++;});$('#links-form').addEventListener('submit',()=>{dirty++;});$('#photo-input').addEventListener('change',()=>{dirty++;});
+$('#entry-form').addEventListener('submit',()=>{dirty++;});$('#experience-form').addEventListener('submit',()=>{dirty++;});$('#links-form').addEventListener('submit',()=>{dirty++;});$('#photo-input').addEventListener('change',()=>{dirty++;});
 publishButton.addEventListener('click',async()=>{
   if(!client||busy)return;busy=true;publishButton.disabled=true;publishButton.textContent='Публикую…';$('#owner-check').hidden=true;
   let nextRevision;
