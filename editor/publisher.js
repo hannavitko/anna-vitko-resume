@@ -29,6 +29,8 @@ function publicCopy(source){
   const doc=document.implementation.createHTMLDocument('');doc.documentElement.replaceWith(source.documentElement.cloneNode(true));
   doc.body.classList.remove('editor-locked','owner-editor','editing');
   doc.title='Анна Витко — резюме-портфолио';
+  doc.querySelector('meta[name="robots"]')?.remove();
+  doc.querySelector('meta[name="description"]')?.setAttribute('content','Анна Витко — маркетолог. B2B и B2C, стратегия, продвижение, аналитика и запуск продуктов.');
   doc.querySelectorAll('script,.toolbar,.owner-header,.owner-login,#owner-style,#photo-input,.edit-add-row,.add-tool-inline,.remove-added,.photo-button,#links-dialog,#reset-dialog,#entry-dialog,#toast').forEach(el=>el.remove());
   for(const el of doc.querySelectorAll('*'))for(const attribute of [...el.attributes])if(attribute.name.startsWith('data-')&&!['data-certificate'].includes(attribute.name))el.removeAttribute(attribute.name);
   doc.querySelectorAll('[contenteditable],[spellcheck]').forEach(el=>{el.removeAttribute('contenteditable');el.removeAttribute('spellcheck');});
