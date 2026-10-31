@@ -1,3 +1,4 @@
+import './full-editor.js?v=full-v4';
 import {GitHubPublisher} from './github-client.js';
 import {RememberedSession} from './remember-session.js';
 const remembered=new RememberedSession();
@@ -16,6 +17,8 @@ function cleanClone(rev){
   doc.body.classList.remove('editing');doc.body.classList.add('editor-locked');
   doc.querySelectorAll('[contenteditable],[spellcheck]').forEach(el=>{el.removeAttribute('contenteditable');el.removeAttribute('spellcheck');});
   doc.querySelectorAll('dialog').forEach(el=>el.removeAttribute('open'));
+  doc.querySelector('#content-list')?.replaceChildren();
+  doc.querySelector('#record-error')?.replaceChildren();
   doc.querySelectorAll('input').forEach(el=>{el.value='';el.removeAttribute('value');});
   doc.querySelectorAll('textarea').forEach(el=>el.textContent='');
   const remember=doc.querySelector('#owner-remember');remember.checked=false;remember.removeAttribute('checked');
@@ -32,10 +35,11 @@ function cleanClone(rev){
 function publicCopy(source){
   const doc=document.implementation.createHTMLDocument('');doc.documentElement.replaceWith(source.documentElement.cloneNode(true));
   doc.body.classList.remove('editor-locked','owner-editor','editing');
+  doc.querySelectorAll('#resume [data-edit]').forEach(el=>{if(!el.textContent.trim()&&!el.querySelector('img'))el.remove();});doc.querySelector('#portrait[hidden]')?.remove();
   doc.title='Анна Витко — резюме-портфолио';
   doc.querySelector('meta[name="robots"]')?.remove();
   doc.querySelector('meta[name="description"]')?.setAttribute('content','Анна Витко — маркетолог. B2B и B2C, стратегия, продвижение, аналитика и запуск продуктов.');
-  doc.querySelectorAll('script,.toolbar,.owner-header,.owner-login,#owner-style,#photo-input,.edit-add-row,.add-tool-inline,.remove-added,.photo-button,#links-dialog,#reset-dialog,#entry-dialog,#experience-dialog,#toast').forEach(el=>el.remove());
+  doc.querySelectorAll('script,.toolbar,.owner-header,.owner-login,#owner-style,#photo-input,.edit-add-row,.add-tool-inline,.remove-added,.photo-button,#links-dialog,#reset-dialog,#entry-dialog,#experience-dialog,[data-editor-only],#toast').forEach(el=>el.remove());
   for(const el of doc.querySelectorAll('*'))for(const attribute of [...el.attributes])if(attribute.name.startsWith('data-')&&!['data-certificate'].includes(attribute.name))el.removeAttribute(attribute.name);
   doc.querySelectorAll('[contenteditable],[spellcheck]').forEach(el=>{el.removeAttribute('contenteditable');el.removeAttribute('spellcheck');});
   const certScript=doc.createElement('script');certScript.textContent="document.addEventListener('click',e=>{const a=e.target.closest('a[data-certificate]');if(!a)return;e.preventDefault();const dialog=document.querySelector('#cert-dialog');dialog.querySelector('img').src=a.querySelector('img').src;dialog.querySelector('h2').textContent=a.querySelector('img').alt;dialog.showModal();});document.querySelector('#cert-close').addEventListener('click',()=>document.querySelector('#cert-dialog').close());";doc.body.append(certScript);
@@ -54,6 +58,7 @@ async function checkLive(expected,generation){
 }
 async function signIn(key,rememberKey,automatic=false){
   $('#owner-token').value='';
+  await window.resumeDraftReady;
   if(!key.startsWith('github_pat_')){$('#owner-login-error').textContent='Введите ограниченный ключ GitHub (fine-grained personal access token).';return;}
   const attempt=++loginAttempt,button=$('#owner-login-submit');button.disabled=true;button.textContent=automatic?'Восстанавливаю вход…':'Проверяю GitHub…';$('#owner-login-error').textContent='';
   const candidate=new GitHubPublisher(key);
@@ -77,6 +82,7 @@ async function signIn(key,rememberKey,automatic=false){
 function restoreSignIn(){let key=remembered.read();if(!key)return;$('#owner-remember').checked=true;signIn(key,true,true);key='';}
 $('#owner-login-form').addEventListener('submit',e=>{e.preventDefault();signIn($('#owner-token').value.trim(),$('#owner-remember').checked);});
 $('#owner-logout').addEventListener('click',()=>lock(true));
+document.addEventListener('resume:change',()=>{dirty++;if(!busy&&client)setStatus('Есть неопубликованные правки. Нажмите «Опубликовать».');});
 $('#resume').addEventListener('input',()=>{dirty++;if(!busy&&client)setStatus('Есть неопубликованные правки. Черновик сохраняется на этом устройстве.');});
 $('#resume').addEventListener('click',e=>{if(e.target.closest('[data-remove-added]'))dirty++;});
 $('#reset-confirm').addEventListener('click',()=>{dirty++;if(client&&!busy)setStatus('Есть неопубликованные правки.');});
